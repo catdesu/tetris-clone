@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon">
+    <title>Tetris.js</title>
+</head>
+<body class="bg-gradient">
+    <div class="flex flex-col items-center justify-items-center">
+        <div class="p-1 mt-1 border-solid border border-black items-center justify-items-center">
+            <canvas width="80" height="80" id='preview'></canvas>
+        </div>
+        <div class="inline-flex pt-3">
+            <button id="btn_start" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">
+              Start
+            </button>
+            <button id="btn_pause" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-none">
+                Pause
+            </button>
+            <button id="btn_restart" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
+              Restart
+            </button>
+          </div>
+        <div id='AllLinesOut' class="pt-3 pb-3">Score: 0</div>
+        <div id='TetrisDIV' class="border-solid border border-black">
+            <canvas class="tetris-bg-img" width='320' height='640' id='game'></canvas>
+        </div>
+    </div>
+    <script src="tetris.js"></script>
+</body>
+</html>

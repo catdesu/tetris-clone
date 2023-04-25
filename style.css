@@ -1,0 +1,14 @@
+.bg-gradient {
+    background-image: linear-gradient(to bottom, #bb8f90, #b58893, #ab8296, #9f7e99, #8f7a9c, #897ca1, #837ea6, #7b81aa, #7f89b4, #8391be, #8799c9, #8aa1d3);
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+.tetris-bg-img {
+    background:url('img/tetrisback.png');  
+    background-size: 100%; 
+    height: 100%
+}
