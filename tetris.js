@@ -394,15 +394,15 @@ function gameStart(time = gameSpeed) {
     btnStart.disabled = true;
 }
 
-btnStart.addEventListener('click', () => {
+btnStart.addEventListener('click', (e) => {
     gameStart();
 });
 
-btnPause.addEventListener('click', () => {
+btnPause.addEventListener('click', (e) => {
     toggleGamePause();
 });
 
-btnRestart.addEventListener('click', () => {
+btnRestart.addEventListener('click', (e) => {
     // Reset variables and start a new game
     init();
     gameStart();

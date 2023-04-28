@@ -7,6 +7,10 @@ html, body {
     height: 100%;
 }
 
+body {
+    justify-content: center;
+}
+
 .tetris-bg-img {
     background:url('img/tetrisback.png');  
     background-size: 100%; 
