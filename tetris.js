@@ -16,6 +16,11 @@ let count = 0;
 let scoreCount = 0;
 let gameOver = false;
 let checkingScore = false;
+let touchStartX = 0;
+let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+let rotateFlag = true;
 let interval;
 let tetrominoNext;
 let tetromino;
@@ -260,16 +265,14 @@ function showGameOver() {
 function showGamePaused() {
     context.fillStyle = 'black';
     context.globalAlpha = 0.75;
-    context.fillRect(0, canvas.height / 2 - 30, canvas.width, 90);
+    context.fillRect(0, canvas.height / 2 - 30, canvas.width, 55);
 
     context.globalAlpha = 1;
     context.fillStyle = 'white';
     context.font = '36px monospace';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText('GAME PAUSED', canvas.width / 2, canvas.height / 2);
-    context.font = '24px monospace';
-    context.fillText('Press Enter to resume', canvas.width / 2, canvas.height / 2 + 40);
+    context.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
 }
 
 function checkScore() {
@@ -445,4 +448,46 @@ document.addEventListener('keydown', (e) => {
     if ((e.key === 'Escape')) {
         toggleGamePause();
     }
+});
+
+// Trying to adapt for mobile
+document.addEventListener('touchmove', (e) => {
+    rotateFlag = false;
+    touchEndX = e.touches[0].clientX;
+    touchEndY = e.touches[0].clientY;
+
+    // Calculate the horizontal distance moved
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    console.log(touchEndY + ' - ' + touchStartY + ' = ' + deltaY);
+
+    // Determine the direction of the movement
+    if (Math.abs(deltaX) > 20) {
+        const col = deltaX > 0
+        ? tetromino.col + 1
+        : tetromino.col - 1;
+
+        if (isValidMove(tetromino.matrix, tetromino.row, col)) {
+            tetromino.col = col;
+        }
+
+        // Reset the touch start coordinate
+        touchStartX = touchEndX;
+    } else if (Math.abs(deltaY) > 180) {
+        while (!downOne()) {}
+        touchStartY = touchEndY;
+    }
+});
+
+document.addEventListener('touchend', (e) => {
+    if (rotateFlag) {
+        if (typeof tetromino !== 'undefined') {
+            const matrix = rotate(tetromino.matrix);
+            if (isValidMove(matrix, tetromino.row, tetromino.col)) {
+                tetromino.matrix = matrix;
+            }
+        }
+    }
+    rotateFlag = rotateFlag ? true : !rotateFlag;
 });
