@@ -7,7 +7,7 @@ let tetrominoSequence = [];
 // tetris playfield is 10x20, with a few rows offscreen
 let playfield = [];
 let AllLinesOut = 0;
-let isPaused = false;
+let isPaused = true;
 let btnStart = document.getElementById('btn_start');
 let btnPause = document.getElementById('btn_pause');
 let btnRestart = document.getElementById('btn_restart');
@@ -24,6 +24,7 @@ let rotateFlag = true;
 let interval;
 let tetrominoNext;
 let tetromino;
+let lastTimeStamp = 0;
 
 // how to draw each tetromino
 const tetrominos = {
@@ -74,6 +75,8 @@ const colors = {
     'J': 'rgba(0, 0, 255)',
     'L': 'rgba(0, 128, 128)'
 };
+
+btnPause.disabled = true;
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -395,6 +398,7 @@ function gameStart(time = gameSpeed) {
     init();
     interval = setInterval(loop, time);
     btnStart.disabled = true;
+    btnPause.disabled = false;
 }
 
 btnStart.addEventListener('click', (e) => {
@@ -450,44 +454,52 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Trying to adapt for mobile
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+});
+
 document.addEventListener('touchmove', (e) => {
-    rotateFlag = false;
-    touchEndX = e.touches[0].clientX;
-    touchEndY = e.touches[0].clientY;
+    if (!isPaused) {
+        rotateFlag = false;
+        touchEndX = e.touches[0].clientX;
+        touchEndY = e.touches[0].clientY;
 
-    // Calculate the horizontal distance moved
-    const deltaX = touchEndX - touchStartX;
-    const deltaY = touchEndY - touchStartY;
+        const timeStamp = e.timeStamp;
+        const deltaTime = timeStamp - lastTimeStamp;
+        lastTimeStamp = timeStamp;
 
-    console.log(touchEndY + ' - ' + touchStartY + ' = ' + deltaY);
+        // Calculate the horizontal distance moved
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
 
-    // Determine the direction of the movement
-    if (Math.abs(deltaX) > 20) {
-        const col = deltaX > 0
-        ? tetromino.col + 1
-        : tetromino.col - 1;
-
-        if (isValidMove(tetromino.matrix, tetromino.row, col)) {
-            tetromino.col = col;
+        // Determine the direction of the movement
+        if (Math.abs(deltaX) > 20) {
+            const col = deltaX > 0 ? tetromino.col + 1 : tetromino.col - 1;
+            if (isValidMove(tetromino.matrix, tetromino.row, col)) {
+                tetromino.col = col;
+            }
+            // Reset the touch start coordinate
+            touchStartX = touchEndX;
+        } else if (deltaY > 40 && deltaTime > 9) {
+            // Add a delay to the downward movement
+            while(!downOne());
+            touchStartY = touchEndY;
         }
-
-        // Reset the touch start coordinate
-        touchStartX = touchEndX;
-    } else if (Math.abs(deltaY) > 180) {
-        while (!downOne()) {}
-        touchStartY = touchEndY;
+        console.log(Math.abs(deltaY), ' : ', deltaTime);
     }
 });
 
 document.addEventListener('touchend', (e) => {
-    if (rotateFlag) {
-        if (typeof tetromino !== 'undefined') {
-            const matrix = rotate(tetromino.matrix);
-            if (isValidMove(matrix, tetromino.row, tetromino.col)) {
-                tetromino.matrix = matrix;
+    if (!isPaused) {
+        if (rotateFlag) {
+            if (typeof tetromino !== 'undefined') {
+                const matrix = rotate(tetromino.matrix);
+                if (isValidMove(matrix, tetromino.row, tetromino.col)) {
+                    tetromino.matrix = matrix;
+                }
             }
         }
+        rotateFlag = rotateFlag ? true : !rotateFlag;
     }
-    rotateFlag = rotateFlag ? true : !rotateFlag;
 });
