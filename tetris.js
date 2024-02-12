@@ -363,6 +363,7 @@ function toggleGamePause() {
     if (!isPaused) {
         btnPause.innerText = 'Pause';
         window.status = false;
+        canvas.focus();
     } else {
         showGamePaused();
         btnPause.innerText = 'Resume';
@@ -401,6 +402,7 @@ function gameStart(time = gameSpeed) {
     btnPause.innerText = 'Pause';
     btnStart.disabled = true;
     btnPause.disabled = false;
+    canvas.focus();
 }
 
 btnStart.addEventListener('click', (e) => {
@@ -447,6 +449,7 @@ document.addEventListener('keydown', (e) => {
 
     // space key (fast drop)
     if (e.key === ' ') {
+        e.preventDefault();
         while (!downOne()) {}
     }
 
@@ -502,7 +505,7 @@ document.addEventListener('touchend', (e) => {
     
     // Define your threshold for a fast click (in milliseconds)
     const fastClickThreshold = 150;
-    console.log(touchDuration, fastClickThreshold);
+
     if (touchDuration > fastClickThreshold) return;
 
     const matrix = rotate(tetromino.matrix);
