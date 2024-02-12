@@ -4,7 +4,7 @@ Welcome to my Tetris clone project! This is a simple implementation of the class
 
 ## Demo
 
-You can play the game live [here](#) (insert link to live demo).
+You can play the game live [here](https://noobill.ch/tetris).
 
 ## Features
 
