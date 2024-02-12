@@ -13,7 +13,6 @@ let btnPause = document.getElementById('btn_pause');
 let btnRestart = document.getElementById('btn_restart');
 let gameSpeed = 15;
 let count = 0;
-let scoreCount = 0;
 let gameOver = false;
 let checkingScore = false;
 let touchStartX = 0;
@@ -25,6 +24,8 @@ let interval;
 let tetrominoNext;
 let tetromino;
 let lastTimeStamp = 0;
+let touchStartTime;
+let isDownwardMovementTriggered = false;
 
 // how to draw each tetromino
 const tetrominos = {
@@ -357,7 +358,7 @@ function downOne() {
 }
 
 function toggleGamePause() {
-    isPaused = isPaused ? false : true;
+    isPaused = !isPaused;
 
     if (!isPaused) {
         btnPause.innerText = 'Pause';
@@ -397,6 +398,7 @@ function gameStart(time = gameSpeed) {
     // start the game
     init();
     interval = setInterval(loop, time);
+    btnPause.innerText = 'Pause';
     btnStart.disabled = true;
     btnPause.disabled = false;
 }
@@ -445,8 +447,7 @@ document.addEventListener('keydown', (e) => {
 
     // space key (fast drop)
     if (e.key === ' ') {
-        while (!downOne()) {
-        }
+        while (!downOne()) {}
     }
 
     if ((e.key === 'Escape')) {
@@ -455,51 +456,60 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('touchstart', (e) => {
+    touchStartTime = Date.now();
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
 });
 
 document.addEventListener('touchmove', (e) => {
-    if (!isPaused) {
-        rotateFlag = false;
-        touchEndX = e.touches[0].clientX;
-        touchEndY = e.touches[0].clientY;
+    if (isPaused) return;
 
-        const timeStamp = e.timeStamp;
-        const deltaTime = timeStamp - lastTimeStamp;
-        lastTimeStamp = timeStamp;
+    rotateFlag = false;
+    touchEndX = e.touches[0].clientX;
+    touchEndY = e.touches[0].clientY;
 
-        // Calculate the horizontal distance moved
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = touchEndY - touchStartY;
+    const timeStamp = e.timeStamp;
+    const deltaTime = timeStamp - lastTimeStamp;
+    lastTimeStamp = timeStamp;
 
-        // Determine the direction of the movement
-        if (Math.abs(deltaX) > 20) {
-            const col = deltaX > 0 ? tetromino.col + 1 : tetromino.col - 1;
-            if (isValidMove(tetromino.matrix, tetromino.row, col)) {
-                tetromino.col = col;
-            }
-            // Reset the touch start coordinate
-            touchStartX = touchEndX;
-        } else if (deltaY > 40 && deltaTime > 9) {
-            // Add a delay to the downward movement
-            while(!downOne());
-            touchStartY = touchEndY;
+    // Calculate the horizontal distance moved
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // Determine the direction of the movement
+    if (Math.abs(deltaX) > 20) {
+        const col = deltaX > 0 ? tetromino.col + 1 : tetromino.col - 1;
+        if (isValidMove(tetromino.matrix, tetromino.row, col)) {
+            tetromino.col = col;
         }
-        console.log(Math.abs(deltaY), ' : ', deltaTime);
+        // Reset the touch start coordinate
+        touchStartX = touchEndX;
+    } else if (deltaY > 40 && deltaTime > 9 && !isDownwardMovementTriggered) {
+        // Add a delay to the downward movement
+        while(!downOne());
+        touchStartY = touchEndY;
+        isDownwardMovementTriggered = true;
     }
 });
 
 document.addEventListener('touchend', (e) => {
-    if (!isPaused) {
-        if (rotateFlag) {
-            if (typeof tetromino !== 'undefined') {
-                const matrix = rotate(tetromino.matrix);
-                if (isValidMove(matrix, tetromino.row, tetromino.col)) {
-                    tetromino.matrix = matrix;
-                }
-            }
-        }
-        rotateFlag = rotateFlag ? true : !rotateFlag;
+    isDownwardMovementTriggered = false;
+    if (isPaused) return;
+    if (!tetromino) return;
+
+    const touchEndTime = Date.now();
+    const touchDuration = touchEndTime - touchStartTime;
+    
+    // Define your threshold for a fast click (in milliseconds)
+    const fastClickThreshold = 150;
+    console.log(touchDuration, fastClickThreshold);
+    if (touchDuration > fastClickThreshold) return;
+
+    const matrix = rotate(tetromino.matrix);
+
+    if (isValidMove(matrix, tetromino.row, tetromino.col)) {
+        tetromino.matrix = matrix;
     }
+
+    rotateFlag = rotateFlag ? true : !rotateFlag;
 });
