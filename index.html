@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,22 +10,30 @@
     <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
     <title>Tetris Clone</title>
 </head>
+
 <body class="flex flex-row content-center bg-gradient md:items-center">
     <div class="flex-col">
         <div class="inline-flex w-full pt-3">
-            <button id="btn_start" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l w-full">
+            <button id="btn_start"
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l w-full">
                 Start
             </button>
-            <button id="btn_pause" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-none w-full">
+            <button id="btn_pause"
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r w-full">
                 Pause
-            </button>
-            <button id="btn_restart" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r w-full">
-                Restart
             </button>
         </div>
         <div class="mt-3 flex-row items-center justify-items-center">
             <div id='TetrisDIV' class="border-solid border border-black">
-                <canvas class="tetris-bg-img" width='320' height='640' id='game'></canvas>
+                <div class="relative">
+                    <div class="md:hidden absolute top-0 left-0 w-full p-2 flex flex-row justify-between">
+                        <div id='AllLinesOut' class="text-white">Score: 0</div>
+                        <canvas width="60" height="60" id='preview'></canvas>
+                    </div>
+                    <canvas class="tetris-bg-img" width='320' height='640' id='game'></canvas> <!-- Empty div to hold the canvas -->
+                </div>
+                
+                
             </div>
         </div>
     </div>
@@ -33,6 +42,7 @@
         <div>Preview</div>
         <canvas width="80" height="80" id='preview'></canvas>
     </div>
-    <script src="tetris.js"></script>
+    <script type="application/javascript" src="tetris.js"></script>
 </body>
+
 </html>
