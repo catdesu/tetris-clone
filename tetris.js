@@ -8,13 +8,13 @@ let tetrominoSequence = [];
 // keep track of what is in every cell of the game using a 2d array
 // tetris playfield is 10x20, with a few rows offscreen
 let playfield = [];
-let AllLinesOut = 0;
-let isPaused = true;
+let AllLinesRemoved = 0;
+let isGamePaused = true;
 let btnStart = document.getElementById('btn_start');
 let btnPause = document.getElementById('btn_pause');
 let gameSpeed = 15;
-let count = 0;
-let gameOver = false;
+let frameCount = 0;
+let isGameOver = false;
 let checkingScore = false;
 let touchStartX = 0;
 let touchEndX = 0;
@@ -22,7 +22,7 @@ let touchStartY = 0;
 let touchEndY = 0;
 let rotateFlag = true;
 let interval;
-let tetrominoNext;
+let nextTetromino;
 let tetromino;
 let lastTimeStamp = 0;
 let touchStartTime;
@@ -150,7 +150,7 @@ function isValidMove(matrix, cellRow, cellCol) {
 
 // place the tetromino on the playfield
 function placeTetromino() {
-  let linesOut = 0;
+  let linesRemoved = 0;
   for (let row = 0; row < tetromino.matrix.length; row++) {
     for (let col = 0; col < tetromino.matrix[row].length; col++) {
       if (tetromino.matrix[row][col]) {
@@ -174,22 +174,22 @@ function placeTetromino() {
           playfield[r][c] = playfield[r - 1][c];
         }
       }
-      linesOut++;
+      linesRemoved++;
     } else {
       row--;
     }
   }
 
-  if (linesOut > 0) {
-    AllLinesOut += linesOut;
-    if (AllLinesOut % 10 === 0) checkingScore = false;
+  if (linesRemoved > 0) {
+    AllLinesRemoved += linesRemoved;
+    if (AllLinesRemoved % 10 === 0) checkingScore = false;
     scoreDisplays.forEach(scoreDisplay => {
-      scoreDisplay.innerText = `Score: ${AllLinesOut}`;
+      scoreDisplay.innerText = `Score: ${AllLinesRemoved}`;
     });
   }
 
-  tetromino = tetrominoNext;
-  tetrominoNext = getNextTetromino();
+  tetromino = nextTetromino;
+  nextTetromino = getNextTetromino();
 
   previewCanvases.forEach(previewCanvas => {
     drawPreview(previewCanvas);
@@ -200,16 +200,19 @@ function drawPreview(previewCanvas) {
   const previewContext = previewCanvas.getContext('2d');
   const blockSize = previewCanvas.width / 4;
   previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-  const name = tetrominoNext.name;
+  const name = nextTetromino.name;
   previewContext.fillStyle = colors[name];
 
-  const xOffset = (previewCanvas.width - tetrominoNext.matrix[0].length * blockSize) / 2;
-  const yOffset = (previewCanvas.height - tetrominoNext.matrix.length * blockSize) / 2;
+  const xOffset = (previewCanvas.width - nextTetromino.matrix[0].length * blockSize) / 2;
+  const yOffset = (previewCanvas.height - nextTetromino.matrix.length * blockSize) / 2;
 
-  for (let row = 0; row < tetrominoNext.matrix.length; row++) {
-    for (let col = 0; col < tetrominoNext.matrix[row].length; col++) {
-      if (tetrominoNext.matrix[row][col]) {
-        previewContext.fillRect(col * blockSize + xOffset, row * blockSize + yOffset, blockSize - 1, blockSize - 1);
+  for (let row = 0; row < nextTetromino.matrix.length; row++) {
+    for (let col = 0; col < nextTetromino.matrix[row].length; col++) {
+      if (nextTetromino.matrix[row][col]) {
+        previewContext.fillRect(col * blockSize + xOffset, 
+          row * blockSize + yOffset, 
+          blockSize - 1, blockSize - 1
+        );
       }
     }
   }
@@ -223,7 +226,15 @@ function drawDownPreview() {
   };
   context.clearRect(0, 0, canvas.width, canvas.height);
   drawMatrix(playfield, { x: 0, y: 0 }, blockSize, context);
-  drawMatrix(previewTetromino.matrix, { x: previewTetromino.col, y: previewTetromino.row }, blockSize, context, colors[previewTetromino.name], true);
+  drawMatrix(previewTetromino.matrix, { 
+      x: previewTetromino.col, 
+      y: previewTetromino.row
+    }, 
+    blockSize,
+    context,
+    colors[previewTetromino.name], 
+    true
+  );
 }
 
 function getGhostPieceRow(matrix, row, col) {
@@ -236,9 +247,11 @@ function drawMatrix(matrix, offset, blockSize, context, color, ghost = false) {
     row.forEach((value, x) => {
       if (value) {
         context.fillStyle = ghost ? color.slice(0, -1) + ', 0.3)' : colors[value];
-        context.fillRect((offset.x + x) * blockSize, (offset.y + y) * blockSize, blockSize - 1, blockSize - 1);
+        context.fillRect((offset.x + x) * blockSize, 
+          (offset.y + y) * blockSize, blockSize - 1, blockSize - 1);
         context.strokeStyle = "rgba(0, 0, 0, 0)";
-        context.strokeRect((offset.x + x) * blockSize, (offset.y + y) * blockSize, blockSize - 1, blockSize - 1);
+        context.strokeRect((offset.x + x) * blockSize, 
+          (offset.y + y) * blockSize, blockSize - 1, blockSize - 1);
       }
     });
   });
@@ -247,7 +260,7 @@ function drawMatrix(matrix, offset, blockSize, context, color, ghost = false) {
 // show the game over screen
 function showGameOver() {
   clearInterval(interval);
-  gameOver = true;
+  isGameOver = true;
 
   context.fillStyle = 'black';
   context.globalAlpha = 0.75;
@@ -258,8 +271,10 @@ function showGameOver() {
   context.font = '36px monospace';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
-  context.fillText('Score: ' + AllLinesOut, canvas.width / 2, canvas.height / 2 + 40);
+  context.fillText('GAME OVER!', canvas.width / 2,
+    canvas.height / 2);
+  context.fillText('Score: ' + AllLinesRemoved, canvas.width / 2,
+    canvas.height / 2 + 40);
   btnStart.disabled = false;
 }
 
@@ -281,7 +296,7 @@ function checkScore() {
 
   checkingScore = true;
 
-  if (AllLinesOut % 10 === 0 && AllLinesOut > 0) {
+  if (AllLinesRemoved % 10 === 0 && AllLinesRemoved > 0) {
     gameSpeed--;
     clearInterval(interval);
     interval = setInterval(loop, gameSpeed);
@@ -290,8 +305,8 @@ function checkScore() {
 
 // game loop
 function loop() {
-  window.status = isPaused;
-  if (isPaused) return;
+  window.status = isGamePaused;
+  if (isGamePaused) return;
 
   context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -314,9 +329,9 @@ function loop() {
   if (tetromino) {
     drawDownPreview();
     // tetromino falls every 35 frames
-    if (++count > 35) {
+    if (++frameCount > 35) {
       tetromino.row++;
-      count = 0;
+      frameCount = 0;
 
       // place piece if it runs into anything
       if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
@@ -332,7 +347,8 @@ function loop() {
         if (tetromino.matrix[row][col]) {
 
           // drawing 1 px smaller than the grid creates a grid effect
-          context.fillRect((tetromino.col + col) * grid, (tetromino.row + row) * grid, grid - 1, grid - 1);
+          context.fillRect((tetromino.col + col) * grid, 
+            (tetromino.row + row) * grid, grid - 1, grid - 1);
         }
       }
     }
@@ -352,9 +368,9 @@ function downOne() {
 }
 
 function toggleGamePause() {
-  isPaused = !isPaused;
+  isGamePaused = !isGamePaused;
 
-  if (!isPaused) {
+  if (!isGamePaused) {
     btnPause.innerText = 'Pause';
     window.status = false;
     canvas.focus();
@@ -378,15 +394,15 @@ function init() {
     }
   }
 
-  gameOver = false;
-  AllLinesOut = 0;
+  isGameOver = false;
+  AllLinesRemoved = 0;
   scoreDisplays.forEach(scoreDisplay => {
-    scoreDisplay.innerText = `Score: ${AllLinesOut}`;
+    scoreDisplay.innerText = `Score: ${AllLinesRemoved}`;
   });
-  isPaused = false;
+  isGamePaused = false;
   tetrominoSequence = [];
   tetromino = getNextTetromino();
-  tetrominoNext = getNextTetromino();
+  nextTetromino = getNextTetromino();
 
   previewCanvases.forEach(previewCanvas => {
     drawPreview(previewCanvas);
@@ -414,9 +430,9 @@ btnPause.addEventListener('click', () => {
 
 // listen to keyboard events to move the active tetromino
 document.addEventListener('keydown', (event) => {
-  if (gameOver) return;
+  if (isGameOver) return;
 
-  if (isPaused) {
+  if (isGamePaused) {
     if (event.key !== 'Escape' && event.key !== 'p') {
       event.preventDefault();
       return;
@@ -460,14 +476,14 @@ document.addEventListener('keydown', (event) => {
 
 // Touch screen support
 canvas.addEventListener('touchstart', (event) => {
-  if (isPaused) return;
+  if (isGamePaused) return;
   touchStartTime = Date.now();
   touchStartX = event.touches[0].clientX;
   touchStartY = event.touches[0].clientY;
 });
 
 canvas.addEventListener('touchmove', (event) => {
-  if (isPaused) return;
+  if (isGamePaused) return;
 
   rotateFlag = false;
   touchEndX = event.touches[0].clientX;
@@ -499,7 +515,7 @@ canvas.addEventListener('touchmove', (event) => {
 
 canvas.addEventListener('touchend', () => {
   isDownwardMovementTriggered = false;
-  if (isPaused) return;
+  if (isGamePaused) return;
   if (!tetromino) return;
 
   const touchEndTime = Date.now();
