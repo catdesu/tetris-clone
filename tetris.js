@@ -1,4 +1,5 @@
 const canvas = document.getElementById('game');
+const previewCanvases = document.querySelectorAll('.preview-canvas');
 const context = canvas.getContext('2d');
 const grid = 32;
 let tetrominoSequence = [];
@@ -186,11 +187,13 @@ function placeTetromino() {
 
   tetromino = tetrominoNext;
   tetrominoNext = getNextTetromino();
-  drawPreview();
+
+  previewCanvases.forEach(previewCanvas => {
+    drawPreview(previewCanvas);
+  });
 }
 
-function drawPreview() {
-  const previewCanvas = document.getElementById('preview');
+function drawPreview(previewCanvas) {
   const previewContext = previewCanvas.getContext('2d');
   const blockSize = previewCanvas.width / 4;
   previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -379,7 +382,10 @@ function init() {
   tetrominoSequence = [];
   tetromino = getNextTetromino();
   tetrominoNext = getNextTetromino();
-  drawPreview();
+
+  previewCanvases.forEach(previewCanvas => {
+    drawPreview(previewCanvas);
+  });
   drawDownPreview();
 }
 
