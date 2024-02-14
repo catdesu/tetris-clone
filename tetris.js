@@ -1,5 +1,6 @@
 const canvas = document.getElementById('game');
 const previewCanvases = document.querySelectorAll('.preview-canvas');
+const scoreDisplays = document.querySelectorAll('.score-display');
 const context = canvas.getContext('2d');
 const grid = 32;
 let tetrominoSequence = [];
@@ -182,7 +183,9 @@ function placeTetromino() {
   if (linesOut > 0) {
     AllLinesOut += linesOut;
     if (AllLinesOut % 10 === 0) checkingScore = false;
-    document.getElementById('AllLinesOut').innerHTML = `Score: ${AllLinesOut}`;
+    scoreDisplays.forEach(scoreDisplay => {
+      scoreDisplay.innerText = `Score: ${AllLinesOut}`;
+    });
   }
 
   tetromino = tetrominoNext;
@@ -377,7 +380,9 @@ function init() {
 
   gameOver = false;
   AllLinesOut = 0;
-  document.getElementById('AllLinesOut').innerHTML = 'Score: ' + AllLinesOut;
+  scoreDisplays.forEach(scoreDisplay => {
+    scoreDisplay.innerText = `Score: ${AllLinesOut}`;
+  });
   isPaused = false;
   tetrominoSequence = [];
   tetromino = getNextTetromino();

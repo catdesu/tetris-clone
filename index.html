@@ -27,7 +27,7 @@
             <div id='TetrisDIV' class="border-solid border border-black">
                 <div class="relative">
                     <div class="md:hidden absolute top-0 left-0 w-full p-2 flex flex-row justify-between">
-                        <div id='AllLinesOut' class="text-white">Score: 0</div>
+                        <div class="text-white score-display">Score: 0</div>
                         <canvas width="60" height="60" class='preview-canvas'></canvas>
                     </div>
                     <canvas class="tetris-bg-img" width='320' height='640' id='game'></canvas>
@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="hidden md:flex flex-col w-24 h-40 ml-2 p-1 mt-1 border-solid border border-black items-center content-center">
-        <div id='AllLinesOut' class="pt-3 pb-3">Score: 0</div>
+        <div class="pt-3 pb-3 score-display">Score: 0</div>
         <div>Preview</div>
         <canvas width="80" height="80" class='preview-canvas'></canvas>
     </div>
