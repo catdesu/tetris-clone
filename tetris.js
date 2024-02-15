@@ -477,6 +477,8 @@ document.addEventListener('keydown', (event) => {
 // Touch screen support
 canvas.addEventListener('touchstart', (event) => {
   if (isGamePaused) return;
+  event.preventDefault();
+  
   touchStartTime = Date.now();
   touchStartX = event.touches[0].clientX;
   touchStartY = event.touches[0].clientY;
@@ -484,6 +486,7 @@ canvas.addEventListener('touchstart', (event) => {
 
 canvas.addEventListener('touchmove', (event) => {
   if (isGamePaused) return;
+  event.preventDefault();
 
   rotateFlag = false;
   touchEndX = event.touches[0].clientX;
@@ -513,10 +516,11 @@ canvas.addEventListener('touchmove', (event) => {
   }
 });
 
-canvas.addEventListener('touchend', () => {
+canvas.addEventListener('touchend', (event) => {
   isDownwardMovementTriggered = false;
   if (isGamePaused) return;
   if (!tetromino) return;
+  event.preventDefault();
 
   const touchEndTime = Date.now();
   const touchDuration = touchEndTime - touchStartTime;
