@@ -279,6 +279,7 @@ function showGameOver() {
 }
 
 function showGamePaused() {
+  if (isGameOver) return;
   context.fillStyle = 'black';
   context.globalAlpha = 0.75;
   context.fillRect(0, canvas.height / 2 - 30, canvas.width, 55);
@@ -368,6 +369,7 @@ function downOne() {
 }
 
 function toggleGamePause() {
+  if (isGameOver) return;
   isGamePaused = !isGamePaused;
 
   if (!isGamePaused) {
@@ -478,7 +480,7 @@ document.addEventListener('keydown', (event) => {
 canvas.addEventListener('touchstart', (event) => {
   if (isGamePaused) return;
   event.preventDefault();
-  
+
   touchStartTime = Date.now();
   touchStartX = event.touches[0].clientX;
   touchStartY = event.touches[0].clientY;
